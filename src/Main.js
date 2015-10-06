@@ -1,67 +1,78 @@
-const GITHUB_API_URL = "https://api.github.com/user";
-var display = createDisplay();
+import React from "react";
+import { createStore, applyMiddleware } from "redux";
+import thunk from "redux-thunk";
+import { Provider, connect } from "react-redux";
 
-start();
+import { initializeApi } from "./api";
+import App from "./views/App";
 
-function start() {
-    display.showLoginPrompt();
+var store = applyMiddleware(thunk)(createStore)(reduce);
+var ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
+
+React.render(
+    <Provider store={ store }>
+        { () => <ConnectedApp /> }
+    </Provider>
+, document.body);
+
+function reduce(state = {}, action) {
+    switch(action.type) {
+        case "showGistsView":
+            return Object.assign({}, state, { api: action.api });
+        case "showGists":
+            return Object.assign({}, state, { gists: action.gists });
+        default:
+            return state;
+    }
 }
+
+function mapStateToProps(state) {
+    return {
+        authorized: !!state.api,
+        gists: state.gists
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        login: (login, password) => dispatch(authenticate(login, password)),
+        loadGists: () => dispatch(loadGists())
+    };
+}
+
+const GITHUB_API_URL = "https://api.github.com/user";
 
 function authenticate(login, password) {
-    var credentials = { login, password };
+    return dispatch => {
+        var credentials = { login, password };
 
-    initializeApi(GITHUB_API_URL, credentials).then(api => {
-        if (api) {
-            display.showGists(api);
-        } else {
-            display.showLoginPrompt();
-        }
-    });
-}
-
-function createDisplay() {
-    return {
-        showLoginPrompt() {
-            var credentialsArray = prompt("provide your github login:password").split(":");
-            authenticate(...credentialsArray);
-        },
-        showGists(api) {
-            api.getGists().then(gists => console.log(gists));
-        }
-    };
-}
-
-function initializeApi(url, credentials) {
-    return fetchAuthorized(url, null, credentials).then(user => {
-        return createApi(user, (url, request) => {
-            return fetchAuthorized(url, request, credentials);
+        initializeApi(GITHUB_API_URL, credentials).then(api => {
+            if (api) {
+                dispatch(showGistsView(api));
+            } else {
+                dispatch(showLoginPrompt());
+            }
         });
-    }).catch(() => null);
-}
-
-function fetchAuthorized(url, request, credentials) {
-    var {login, password} = credentials;
-    return fetch(url, Object.assign(request || {}, {
-        headers: {
-            Authorization: "Basic " + btoa(login + ":" + password)
-        }
-    })).then(response => {
-        if (!response.ok) {
-            throw response;
-        }
-        return response.json();
-    });
-}
-
-function createApi(user, fetch) {
-    function makeUrl(name, parameters = {}) {
-        var template = user[name];
-        return template.replace(/{\/(\w+)}/, (match, paramName) => (parameters[paramName] || ""));
-    }
-
-    return {
-        getGists() {
-            return fetch(makeUrl("gists_url"));
-        }
     };
+}
+
+function showGistsView(api) {
+    const type = "showGistsView";
+    return { type, api };
+}
+
+function showLoginPrompt() {
+    return { type: "showLoginPrompt" };
+}
+
+function loadGists() {
+    return (dispatch, getState) => {
+        var { api } = getState();
+        api.getGists().then(gists => dispatch(showGists(gists)));
+    }
+}
+
+function showGists(gists) {
+    const type = "showGists";
+    return { type, gists };
 }
