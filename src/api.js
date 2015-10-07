@@ -22,9 +22,9 @@ function fetchAuthorized(url, request, credentials) {
     });
 }
 
-function createApi(user, fetch) {
+function createApi(userObject, fetch) {
     function makeUrl(name, parameters = {}) {
-        var template = user[name];
+        var template = userObject[name];
         return template.replace(/{\/(\w+)}/, (match, paramName) => (parameters[paramName] || ""));
     }
 
