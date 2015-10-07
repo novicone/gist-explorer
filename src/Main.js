@@ -1,13 +1,15 @@
 import React from "react";
-import { createStore, applyMiddleware } from "redux";
+import { createStore, applyMiddleware, bindActionCreators } from "redux";
 import thunk from "redux-thunk";
 import { Provider, connect } from "react-redux";
-import { fromJS, Map, Record } from "immutable";
+import { fromJS, List, Map, Record } from "immutable";
 
 import { initializeApi } from "./api";
 import App from "./views/App";
 
-var AppStateRecord = Record({ api: null, gists: null });
+const GITHUB_API_URL = "https://api.github.com/user";
+
+var AppStateRecord = Record({ api: null, gists: List(), selectedGist: null });
 
 var store = applyMiddleware(thunk)(createStore)(reduce);
 var ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
@@ -23,27 +25,52 @@ function reduce(state = AppStateRecord(), action) {
         case "showGistsView":
             return state.set("api", action.api);
         case "showGists":
-            return state.set("gists", action.gists);
+            const { gists } = action;
+            return state.merge({
+                gists: gists,
+                selectedGist: gists.get(0).get("id")
+            });
+        case "selectGist":
+            return state.set("selectedGist", action.id);
         default:
             return state;
     }
 }
 
 function mapStateToProps(state) {
+    const selectedGist = state.gists.find(gist => gist.get("id") === state.selectedGist);
     return {
         authorized: !!state.api,
-        gists: state.gists
+        gists: state.gists.map(
+            gist => Object.assign(mapGistToProps(gist), { selected: gist === selectedGist })
+        ).toJS(),
+        selectedGist: selectedGist && mapGistToProps(selectedGist)
     };
+}
+
+function mapGistToProps(gist) {
+    const files = gist.get("files");
+    return {
+        id: gist.get("id"),
+        title: files.keySeq().get(0),
+        files: mapFilesToProps(files)
+    };
+}
+
+function mapFilesToProps(files) {
+    return files.valueSeq().map(file => {
+        return {
+            name: file.get("filename")
+        }
+    }).toJS();
 }
 
 function mapDispatchToProps(dispatch) {
-    return {
-        login: (login, password) => dispatch(authenticate(login, password)),
-        loadGists: () => dispatch(loadGists())
-    };
+    return bindActionCreators({
+        login: authenticate,
+        selectGist: selectGist
+    }, dispatch);
 }
-
-const GITHUB_API_URL = "https://api.github.com/user";
 
 function authenticate(login, password) {
     return dispatch => {
@@ -52,6 +79,7 @@ function authenticate(login, password) {
         initializeApi(GITHUB_API_URL, credentials).then(api => {
             if (api) {
                 dispatch(showGistsView(api));
+                dispatch(loadGists());
             } else {
                 dispatch(showLoginPrompt());
             }
@@ -78,4 +106,8 @@ function loadGists() {
 function showGists(gists) {
     const type = "showGists";
     return { type, gists };
+}
+
+function selectGist(id) {
+    return { type: "selectGist", id };
 }

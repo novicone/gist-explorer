@@ -5,3 +5,12 @@ form {
 input {
     display: block;
 }
+
+li > a {
+    cursor: pointer;
+}
+
+li > a.selected {
+    cursor: default;
+    text-decoration: underline;
+}

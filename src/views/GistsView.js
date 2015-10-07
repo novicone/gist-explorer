@@ -1,18 +1,15 @@
 import React, { Component } from "react";
 
+import GistsList from "./GistsList";
+import GistDetails from "./GistDetails";
+
 export default class GistsView {
-    componentDidMount() {
-        this.props.loadGists();
-    }
     render() {
-        var { gists } = this.props;
-        if (!gists) {
-            return (<div>No gists...</div>);
-        }
         return (
-            <ul>
-                { gists.map(gist => <li><pre>{ JSON.stringify(gist, null, 2) }</pre></li>) }
-            </ul>
+            <main>
+                <GistsList { ...this.props } />
+                <GistDetails { ...this.props.selectedGist } />
+            </main>
         );
     }
 }
