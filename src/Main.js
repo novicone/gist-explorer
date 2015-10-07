@@ -2,9 +2,12 @@ import React from "react";
 import { createStore, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
 import { Provider, connect } from "react-redux";
+import { fromJS, Map, Record } from "immutable";
 
 import { initializeApi } from "./api";
 import App from "./views/App";
+
+var AppStateRecord = Record({ api: null, gists: null });
 
 var store = applyMiddleware(thunk)(createStore)(reduce);
 var ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
@@ -15,12 +18,12 @@ React.render(
     </Provider>
 , document.body);
 
-function reduce(state = {}, action) {
+function reduce(state = AppStateRecord(), action) {
     switch(action.type) {
         case "showGistsView":
-            return Object.assign({}, state, { api: action.api });
+            return state.set("api", action.api);
         case "showGists":
-            return Object.assign({}, state, { gists: action.gists });
+            return state.set("gists", action.gists);
         default:
             return state;
     }
@@ -67,8 +70,8 @@ function showLoginPrompt() {
 
 function loadGists() {
     return (dispatch, getState) => {
-        var { api } = getState();
-        api.getGists().then(gists => dispatch(showGists(gists)));
+        var api = getState().get("api");
+        api.getGists().then(gists => dispatch(showGists(fromJS(gists))));
     }
 }
 

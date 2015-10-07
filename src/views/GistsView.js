@@ -11,7 +11,7 @@ export default class GistsView {
         }
         return (
             <ul>
-                { gists.map(gist => <li><pre>{ JSON.stringify(gist) }</pre></li>) }
+                { gists.map(gist => <li><pre>{ JSON.stringify(gist, null, 2) }</pre></li>) }
             </ul>
         );
     }
