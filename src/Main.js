@@ -2,16 +2,15 @@ import React from "react";
 import { createStore, applyMiddleware, bindActionCreators } from "redux";
 import thunk from "redux-thunk";
 import { Provider, connect } from "react-redux";
-import { fromJS, List, Map, Record } from "immutable";
+import { fromJS } from "immutable";
 
 import { initializeApi } from "./api";
+import reducer from "./reducer";
 import App from "./views/App";
 
 const GITHUB_API_URL = "https://api.github.com/user";
 
-var AppStateRecord = Record({ api: null, gists: List(), selectedGist: null });
-
-var store = applyMiddleware(thunk)(createStore)(reduce);
+var store = applyMiddleware(thunk)(createStore)(reducer);
 var ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
 
 React.render(
@@ -19,23 +18,6 @@ React.render(
         { () => <ConnectedApp /> }
     </Provider>
 , document.body);
-
-function reduce(state = AppStateRecord(), action) {
-    switch(action.type) {
-        case "showGistsView":
-            return state.set("api", action.api);
-        case "showGists":
-            const { gists } = action;
-            return state.merge({
-                gists: gists,
-                selectedGist: gists.get(0).get("id")
-            });
-        case "selectGist":
-            return state.set("selectedGist", action.id);
-        default:
-            return state;
-    }
-}
 
 function mapStateToProps(state) {
     const selectedGist = state.gists.find(gist => gist.get("id") === state.selectedGist);
