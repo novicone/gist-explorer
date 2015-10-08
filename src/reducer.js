@@ -1,18 +1,21 @@
 import { List, Record } from "immutable";
 
-var AppStateRecord = Record({ api: null, gists: List(), selectedGist: null });
+import { Types } from "./Actions";
 
-export default function reducer(state = AppStateRecord(), action) {
+const AppStateRecord = Record({ api: null, gists: List(), selectedGist: null });
+const defaultState = AppStateRecord();
+
+export default function reducer(state = defaultState, action) {
     switch(action.type) {
-        case "showGistsView":
+        case Types.SHOW_GISTS_VIEW:
             return state.set("api", action.api);
-        case "showGists":
+        case Types.SHOW_GISTS:
             const { gists } = action;
             return state.merge({
                 gists: gists,
                 selectedGist: gists.get(0).get("id")
             });
-        case "selectGist":
+        case Types.SELECT_GIST:
             return state.set("selectedGist", action.id);
         default:
             return state;

@@ -2,16 +2,13 @@ import React from "react";
 import { createStore, applyMiddleware, bindActionCreators } from "redux";
 import thunk from "redux-thunk";
 import { Provider, connect } from "react-redux";
-import { fromJS } from "immutable";
 
-import { initializeApi } from "./api";
+import { Creators as ActionCreators } from "./Actions";
 import reducer from "./reducer";
 import App from "./views/App";
 
-const GITHUB_API_URL = "https://api.github.com/user";
-
-var store = applyMiddleware(thunk)(createStore)(reducer);
-var ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
+const store = applyMiddleware(thunk)(createStore)(reducer);
+const ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
 
 React.render(
     <Provider store={ store }>
@@ -49,47 +46,7 @@ function mapFilesToProps(files) {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        login: authenticate,
-        selectGist: selectGist
+        login: ActionCreators.authenticate,
+        selectGist: ActionCreators.selectGist
     }, dispatch);
-}
-
-function authenticate(login, password) {
-    return dispatch => {
-        var credentials = { login, password };
-
-        initializeApi(GITHUB_API_URL, credentials).then(api => {
-            if (api) {
-                dispatch(showGistsView(api));
-                dispatch(loadGists());
-            } else {
-                dispatch(showLoginPrompt());
-            }
-        });
-    };
-}
-
-function showGistsView(api) {
-    const type = "showGistsView";
-    return { type, api };
-}
-
-function showLoginPrompt() {
-    return { type: "showLoginPrompt" };
-}
-
-function loadGists() {
-    return (dispatch, getState) => {
-        var api = getState().get("api");
-        api.getGists().then(gists => dispatch(showGists(fromJS(gists))));
-    }
-}
-
-function showGists(gists) {
-    const type = "showGists";
-    return { type, gists };
-}
-
-function selectGist(id) {
-    return { type: "selectGist", id };
 }
