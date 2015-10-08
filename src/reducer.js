@@ -2,7 +2,7 @@ import { List, Record } from "immutable";
 
 import { Types } from "./Actions";
 
-const AppStateRecord = Record({ api: null, gists: List(), selectedGist: null });
+const AppStateRecord = Record({ api: null, gists: null, selectedGist: null });
 const defaultState = AppStateRecord();
 
 export default function reducer(state = defaultState, action) {

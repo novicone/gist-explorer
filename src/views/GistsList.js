@@ -5,7 +5,7 @@ export default class GistsList extends Component {
         var { gists, selectGist } = this.props;
 
         if (gists.length === 0) {
-            return (<span>Loading...</span>);
+            return (<span>No gists yet</span>);
         }
         return (
             <ul>

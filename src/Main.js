@@ -17,10 +17,12 @@ React.render(
 , document.body);
 
 function mapStateToProps(state) {
-    const selectedGist = state.gists.find(gist => gist.get("id") === state.selectedGist);
+    const { gists } = state;
+
+    const selectedGist = gists && gists.find(gist => gist.get("id") === state.selectedGist);
     return {
         authorized: !!state.api,
-        gists: state.gists.map(
+        gists: gists && gists.map(
             gist => Object.assign(mapGistToProps(gist), { selected: gist === selectedGist })
         ).toJS(),
         selectedGist: selectedGist && mapGistToProps(selectedGist)

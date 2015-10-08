@@ -3,12 +3,11 @@ import { initializeApi } from "./api";
 
 export const Types = {
     SHOW_GISTS_VIEW: "showGistsView",
-    SHOW_LOGIN_PROMPT: "showLoginPrompt",
     SHOW_GISTS: "showGists",
     SELECT_GIST: "selectGist"
 };
 
-export const Creators = { authenticate, showGistsView, showLoginPrompt, loadGists, showGists, selectGist };
+export const Creators = { authenticate, selectGist };
 
 const GITHUB_API_URL = "https://api.github.com/user";
 
