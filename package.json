@@ -1,9 +1,8 @@
 {
   "name": "gist-explorer",
   "scripts": {
-    "watchify": "watchify --extension=js -o app/bundle.js src/Main.js",
-    "serve": "serve app/",
-    "start": "npm run watchify & npm run serve"
+    "test": "mocha --compilers js:babel-core/register -r mocha.config.js",
+    "start": "watchify --extension=js -o app/bundle.js src/Main.js & serve app/"
   },
   "browserify": {
     "transform": [
@@ -19,8 +18,12 @@
     "immutable": "~3.7.5"
   },
   "devDependencies": {
-    "browserify": "~10.2.4",
+    "babel-core": "^5.8.25",
     "babelify": "~6.1.2",
+    "browserify": "~10.2.4",
+    "chai": "^3.3.0",
+    "mocha": "^2.3.3",
+    "sinon": "^1.17.1",
     "watchify": "^3.3.1"
   }
 }
