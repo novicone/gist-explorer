@@ -25,12 +25,20 @@ function fetchAuthorized(url, request, credentials) {
 function createApi(userObject, fetch) {
     function makeUrl(name, parameters = {}) {
         var template = userObject[name];
-        return template.replace(/{\/(\w+)}/, (match, paramName) => (parameters[paramName] || ""));
+        return template.replace(/{\/(\w+)}/g, (match, paramName) => {
+            var value = parameters[paramName];
+            return value ? `/${value}` : "";
+        });
+    }
+
+    function call(endpointName, parameters) {
+        return fetch(makeUrl(endpointName, parameters));
     }
 
     return {
+        call: call,
         getGists() {
-            return fetch(makeUrl("gists_url"));
+            return call("gists_url");
         }
     };
 }
