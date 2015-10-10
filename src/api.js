@@ -9,10 +9,10 @@ function initializeApi(url, credentials) {
 }
 
 function fetchAuthorized(url, request, credentials) {
-    var {login, password} = credentials;
+    const {login, password} = credentials;
     return fetch(url, Object.assign(request || {}, {
         headers: {
-            Authorization: "Basic " + btoa(login + ":" + password)
+            Authorization: "Basic " + btoa(`${login}:${password}`)
         }
     })).then(response => {
         if (!response.ok) {
@@ -24,9 +24,9 @@ function fetchAuthorized(url, request, credentials) {
 
 function createApi(userObject, fetch) {
     function makeUrl(name, parameters = {}) {
-        var template = userObject[name];
+        const template = userObject[name];
         return template.replace(/{\/(\w+)}/g, (match, paramName) => {
-            var value = parameters[paramName];
+            const value = parameters[paramName];
             return value ? `/${value}` : "";
         });
     }
